@@ -36,9 +36,13 @@ export const App = () => {
   };
 
   const getRandomSounds = (length = 3) => {
-    const randomSounds = notes.filter(
-      (n) => !n.includes("b") && n.includes("4")
-    );
+    const randomSounds = notes.filter((n) => {
+      const note = n[0];
+      const isFlat = n[1] === "b";
+      const octave = +(n[1] === "b" ? n[2] : n[1]);
+
+      return !isFlat && octave === 4 && ["C", "D", "E"].includes(note);
+    });
     shuffle(randomSounds);
     randomSounds.length = 3;
 
@@ -54,12 +58,14 @@ export const App = () => {
     const duration = 1;
 
     for (let i = 0; i < sounds.length; i++) {
-      console.log(duration * i * 1000);
-
       setTimeout(() => {
         playNote(sounds[i], duration);
       }, duration * i * 1000);
     }
+    setTimeout(() => {
+      // alert("Done");
+    }, duration * sounds.length * 1000);
+    console.log(duration * sounds.length * 1000);
   };
 
   return (
