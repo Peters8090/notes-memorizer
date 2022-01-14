@@ -15,20 +15,57 @@ const sampler = new Tone.Sampler({
   baseUrl: "https://tonejs.github.io/audio/salamander/",
 }).toDestination();
 
+const shuffle = (array: any[]) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
+
+    // swap elements array[i] and array[j]
+    // we use "destructuring assignment" syntax to achieve that
+    // you'll find more details about that syntax in later chapters
+    // same can be written as:
+    // let t = array[i]; array[i] = array[j]; array[j] = t
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+};
+
 export const App = () => {
-  const playNote = (note: string) => {
+  const playNote = (note: string | string[], duration = 1) => {
     Tone.loaded().then(() => {
-      sampler.triggerAttackRelease(note, 1);
+      sampler.triggerAttackRelease(note, duration);
     });
+  };
+
+  const getRandomSounds = (length = 3) => {
+    const randomSounds = notes.filter(
+      (n) => !n.includes("b") && n.includes("4")
+    );
+    shuffle(randomSounds);
+    randomSounds.length = 3;
+
+    return randomSounds;
+  };
+
+  const playPuzzleChord = () => {
+    playNote(getRandomSounds());
+  };
+
+  const playPuzzleMelody = () => {
+    const sounds = getRandomSounds();
+    const duration = 1;
+
+    for (let i = 0; i < sounds.length; i++) {
+      console.log(duration * i * 1000);
+
+      setTimeout(() => {
+        playNote(sounds[i], duration);
+      }, duration * i * 1000);
+    }
   };
 
   return (
     <div>
-      {notes.map((n) => (
-        <button key={n} onClick={() => playNote(n)}>
-          {n}
-        </button>
-      ))}
+      <button onClick={playPuzzleChord}>Puzzle Chord</button>
+      <button onClick={playPuzzleMelody}>Puzzle Melody</button>
     </div>
   );
 };
