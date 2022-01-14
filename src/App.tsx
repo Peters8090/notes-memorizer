@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import path from "path";
+import React, { Component, useEffect } from "react";
+import * as Tone from "tone";
 
-function App() {
+import { notes } from "./notes";
+
+const sampler = new Tone.Sampler({
+  urls: {
+    C4: "C4.mp3",
+    "D#4": "Ds4.mp3",
+    "F#4": "Fs4.mp3",
+    A4: "A4.mp3",
+  },
+  release: 1,
+  baseUrl: "https://tonejs.github.io/audio/salamander/",
+}).toDestination();
+
+export const App = () => {
+  const playNote = (note: string) => {
+    Tone.loaded().then(() => {
+      sampler.triggerAttackRelease(note, 1);
+    });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {notes.map((n) => (
+        <button key={n} onClick={() => playNote(n)}>
+          {n}
+        </button>
+      ))}
     </div>
   );
-}
-
-export default App;
+};
