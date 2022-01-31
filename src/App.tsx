@@ -30,7 +30,10 @@ const shuffle = (array: any[]) => {
 
 export const App = () => {
   const [allowedNotes, setAllowedNotes] = useState("");
-  const [lastNotes, setLastNotes] = useState("");
+  const [lastNotes, setLastNotes] = useState<{
+    chord: boolean;
+    notes: string;
+  }>();
   const [answer, setAnswer] = useState("");
 
   const playNote = (note: string | string[], duration = 1) => {
@@ -53,12 +56,11 @@ export const App = () => {
     return randomSounds;
   };
 
-  const playPuzzleChord = () => {
-    playNote(getRandomSounds());
+  const playPuzzleChord = (sounds = getRandomSounds()) => {
+    playNote(sounds);
   };
 
-  const playPuzzleMelody = () => {
-    const sounds = getRandomSounds();
+  const playPuzzleMelody = (sounds = getRandomSounds()) => {
     const duration = 1;
 
     for (let i = 0; i < sounds.length; i++) {
@@ -66,28 +68,38 @@ export const App = () => {
         playNote(sounds[i], duration);
       }, duration * i * 1000);
     }
-    setLastNotes(sounds.join(","));
-    // setTimeout(() => {
-    //   alert("Done");
-    // }, duration * sounds.length * 1000);
+    setLastNotes({ chord: false, notes: sounds.join(",") });
+
     console.log(duration * sounds.length * 1000);
+  };
+
+  const playRepeat = () => {
+    if (lastNotes) {
+      if (lastNotes.chord) {
+        playPuzzleChord(lastNotes.notes.split(","));
+      } else {
+        playPuzzleMelody(lastNotes.notes.split(","));
+      }
+    }
   };
 
   return (
     <div>
-      <button onClick={playPuzzleChord}>Puzzle Chord</button>
-      <button onClick={playPuzzleMelody}>Puzzle Melody</button>
-
+      {/* <button onClick={() => playPuzzleChord()}>Puzzle Chord</button> */}
       <input
         value={allowedNotes}
         onChange={(e) => setAllowedNotes(e.target.value.toUpperCase())}
         placeholder="Notes to play Separate with ,"
       />
+      <button onClick={() => playPuzzleMelody()}>Puzzle Melody</button>
+      <button onClick={playRepeat} disabled={!lastNotes}>
+        Repeat
+      </button>
 
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          const lastNotesTolerant = lastNotes
+          const lastNotesTolerant = lastNotes?.notes
             .split("")
             .filter((l) => isNaN(+l))
             .join("");
