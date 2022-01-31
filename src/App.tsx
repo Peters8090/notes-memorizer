@@ -1,5 +1,5 @@
 import path from "path";
-import React, { Component, useEffect } from "react";
+import React, { Component, useEffect, useState } from "react";
 import * as Tone from "tone";
 
 import { notes } from "./notes";
@@ -29,6 +29,10 @@ const shuffle = (array: any[]) => {
 };
 
 export const App = () => {
+  const [allowedNotes, setAllowedNotes] = useState("");
+  const [lastNotes, setLastNotes] = useState("");
+  const [answer, setAnswer] = useState("");
+
   const playNote = (note: string | string[], duration = 1) => {
     Tone.loaded().then(() => {
       sampler.triggerAttackRelease(note, duration);
@@ -41,10 +45,10 @@ export const App = () => {
       const isFlat = n[1] === "b";
       const octave = +(n[1] === "b" ? n[2] : n[1]);
 
-      return !isFlat && octave === 4 && ["C", "D", "E"].includes(note);
+      return !isFlat && octave === 4 && allowedNotes.split(",").includes(note);
     });
     shuffle(randomSounds);
-    randomSounds.length = 3;
+    randomSounds.length = allowedNotes.split(",").length;
 
     return randomSounds;
   };
@@ -62,9 +66,10 @@ export const App = () => {
         playNote(sounds[i], duration);
       }, duration * i * 1000);
     }
-    setTimeout(() => {
-      // alert("Done");
-    }, duration * sounds.length * 1000);
+    setLastNotes(sounds.join(","));
+    // setTimeout(() => {
+    //   alert("Done");
+    // }, duration * sounds.length * 1000);
     console.log(duration * sounds.length * 1000);
   };
 
@@ -72,6 +77,35 @@ export const App = () => {
     <div>
       <button onClick={playPuzzleChord}>Puzzle Chord</button>
       <button onClick={playPuzzleMelody}>Puzzle Melody</button>
+
+      <input
+        value={allowedNotes}
+        onChange={(e) => setAllowedNotes(e.target.value.toUpperCase())}
+        placeholder="Notes to play Separate with ,"
+      />
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          const lastNotesTolerant = lastNotes
+            .split("")
+            .filter((l) => isNaN(+l))
+            .join("");
+
+          if (lastNotesTolerant === answer) {
+            alert("Good");
+          } else {
+            alert("Bad: " + lastNotesTolerant);
+          }
+        }}
+      >
+        <input
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value.toUpperCase())}
+          placeholder="Answer Separate with ,"
+        />
+        <button type="submit">Check</button>
+      </form>
     </div>
   );
 };
