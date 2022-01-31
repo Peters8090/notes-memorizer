@@ -30,10 +30,7 @@ const shuffle = (array: any[]) => {
 
 export const App = () => {
   const [allowedNotes, setAllowedNotes] = useState("");
-  const [lastNotes, setLastNotes] = useState<{
-    chord: boolean;
-    notes: string;
-  }>();
+  const [lastNotes, setLastNotes] = useState("");
   const [answer, setAnswer] = useState("");
 
   const playNote = (note: string | string[], duration = 1) => {
@@ -56,10 +53,6 @@ export const App = () => {
     return randomSounds;
   };
 
-  const playPuzzleChord = (sounds = getRandomSounds()) => {
-    playNote(sounds);
-  };
-
   const playPuzzleMelody = (sounds = getRandomSounds()) => {
     const duration = 1;
 
@@ -68,24 +61,19 @@ export const App = () => {
         playNote(sounds[i], duration);
       }, duration * i * 1000);
     }
-    setLastNotes({ chord: false, notes: sounds.join(",") });
+    setLastNotes(sounds.join(","));
 
     console.log(duration * sounds.length * 1000);
   };
 
   const playRepeat = () => {
     if (lastNotes) {
-      if (lastNotes.chord) {
-        playPuzzleChord(lastNotes.notes.split(","));
-      } else {
-        playPuzzleMelody(lastNotes.notes.split(","));
-      }
+      playPuzzleMelody(lastNotes.split(","));
     }
   };
 
   return (
     <div>
-      {/* <button onClick={() => playPuzzleChord()}>Puzzle Chord</button> */}
       <input
         value={allowedNotes}
         onChange={(e) => setAllowedNotes(e.target.value.toUpperCase())}
@@ -99,7 +87,7 @@ export const App = () => {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          const lastNotesTolerant = lastNotes?.notes
+          const lastNotesTolerant = lastNotes
             .split("")
             .filter((l) => isNaN(+l))
             .join("");
