@@ -1,6 +1,7 @@
 import path from "path";
 import React, { Component, useEffect, useState } from "react";
 import * as Tone from "tone";
+import "./App.css";
 
 import { notes } from "./notes";
 
@@ -48,7 +49,7 @@ export const App = () => {
       return !isFlat && octave === 4 && allowedNotes.split(",").includes(note);
     });
     shuffle(randomSounds);
-    randomSounds.length = allowedNotes.split(",").length;
+    randomSounds.length = Math.min(allowedNotes.split(",").length, 3);
 
     return randomSounds;
   };
@@ -73,14 +74,18 @@ export const App = () => {
   };
 
   return (
-    <div>
+    <div className="App">
+      <h1>Relative Pitch Helper</h1>
+      <h3>Separate notes with a comma, no spaces</h3>
       <input
         value={allowedNotes}
         onChange={(e) => setAllowedNotes(e.target.value.toUpperCase())}
-        placeholder="Notes to play Separate with ,"
+        placeholder="Available notes"
       />
-      <button onClick={() => playPuzzleMelody()}>Puzzle Melody</button>
-      <button onClick={playRepeat} disabled={!lastNotes}>
+      <button disabled={!allowedNotes} onClick={() => playPuzzleMelody()}>
+        Puzzle Melody
+      </button>
+      <button disabled={!lastNotes} onClick={playRepeat}>
         Repeat
       </button>
 
@@ -93,18 +98,22 @@ export const App = () => {
             .join("");
 
           if (lastNotesTolerant === answer) {
-            alert("Good");
+            alert("Good: " + lastNotesTolerant);
           } else {
             alert("Bad: " + lastNotesTolerant);
           }
+
+          setAnswer("");
         }}
       >
         <input
           value={answer}
           onChange={(e) => setAnswer(e.target.value.toUpperCase())}
-          placeholder="Answer Separate with ,"
+          placeholder="Your guess"
         />
-        <button type="submit">Check</button>
+        <button type="submit" disabled={!lastNotes}>
+          Check
+        </button>
       </form>
     </div>
   );
