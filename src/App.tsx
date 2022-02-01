@@ -17,7 +17,9 @@ const sampler = new Tone.Sampler({
 }).toDestination();
 
 const shuffle = (array: any[]) => {
-  for (let i = array.length - 1; i > 0; i--) {
+  const arrCopy = [...array];
+
+  for (let i = arrCopy.length - 1; i > 0; i--) {
     let j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
 
     // swap elements array[i] and array[j]
@@ -25,8 +27,10 @@ const shuffle = (array: any[]) => {
     // you'll find more details about that syntax in later chapters
     // same can be written as:
     // let t = array[i]; array[i] = array[j]; array[j] = t
-    [array[i], array[j]] = [array[j], array[i]];
+    [arrCopy[i], arrCopy[j]] = [arrCopy[j], arrCopy[i]];
   }
+
+  return arrCopy;
 };
 
 export const App = () => {
@@ -39,16 +43,16 @@ export const App = () => {
       sampler.triggerAttackRelease(note, duration);
     });
   };
+  const allowedSounds = notes.filter((n) => {
+    const note = n[0];
+    const isFlat = n[1] === "b";
+    const octave = +(n[1] === "b" ? n[2] : n[1]);
+
+    return !isFlat && octave === 4 && allowedNotes.split(",").includes(note);
+  });
 
   const getRandomSounds = (length = 3) => {
-    const randomSounds = notes.filter((n) => {
-      const note = n[0];
-      const isFlat = n[1] === "b";
-      const octave = +(n[1] === "b" ? n[2] : n[1]);
-
-      return !isFlat && octave === 4 && allowedNotes.split(",").includes(note);
-    });
-    shuffle(randomSounds);
+    const randomSounds = shuffle(allowedSounds);
     randomSounds.length = Math.min(allowedNotes.split(",").length, 3);
 
     return randomSounds;
@@ -79,7 +83,9 @@ export const App = () => {
       <h3>Separate notes with a comma, no spaces</h3>
       <input
         value={allowedNotes}
-        onChange={(e) => setAllowedNotes(e.target.value.toUpperCase())}
+        onChange={(e) =>
+          setAllowedNotes(e.target.value.toUpperCase().replaceAll(".", ","))
+        }
         placeholder="Available notes"
       />
       <button disabled={!allowedNotes} onClick={() => playPuzzleMelody()}>
@@ -88,6 +94,13 @@ export const App = () => {
       <button disabled={!lastNotes} onClick={playRepeat}>
         Repeat
       </button>
+      <div>
+        {allowedSounds.map((n) => (
+          <button key={n} onClick={() => playNote(n)}>
+            {n}
+          </button>
+        ))}
+      </div>
 
       <form
         onSubmit={(e) => {
@@ -108,7 +121,9 @@ export const App = () => {
       >
         <input
           value={answer}
-          onChange={(e) => setAnswer(e.target.value.toUpperCase())}
+          onChange={(e) =>
+            setAnswer(e.target.value.toUpperCase().replaceAll(".", ","))
+          }
           placeholder="Your guess"
         />
         <button type="submit" disabled={!lastNotes}>
